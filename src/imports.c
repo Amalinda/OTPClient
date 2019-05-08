@@ -64,7 +64,7 @@ update_db_from_otps (GSList *otps, AppData *app_data)
         if (hash == 12341234) {
             g_printerr ("===================================================================================================");
             g_printerr ("tmp_string was NULL. Details about the data are:\n");
-            g_printerr ("type: %s\nlabel: %s\nissuer: %s\ndigits: %d\nalgo: %s\nperiod: %d\n", otp->type, otp->label, otp->issuer, otp->digits, otp->algo, otp->period);
+            g_printerr ("type: %s\nlabel: %s\nissuer: %s\ndigits: %d\nalgo: %s\nperiod: %d\n", otp->type, otp->account_name, otp->issuer, otp->digits, otp->algo, otp->period);
             g_printerr ("===================================================================================================");
         } else {
             if (g_slist_find_custom (app_data->db_data->objects_hash, GUINT_TO_POINTER(hash), check_duplicate) == NULL) {
@@ -79,6 +79,7 @@ update_db_from_otps (GSList *otps, AppData *app_data)
     GError *err = NULL;
     update_and_reload_db (app_data, TRUE, &err);
     if (err != NULL && !g_error_matches (err, missing_file_gquark (), MISSING_FILE_CODE)) {
+        g_printerr ("[ERROR]: during execution of 'update_and_reload_db' from imports.c at line 80\n");
         return g_strdup (err->message);
     }
 

@@ -77,8 +77,10 @@ update_and_reload_db (AppData   *app_data,
                       gboolean   regenerate_model,
                       GError   **err)
 {
+    g_printerr ("[INFO]: before update_db on db-misc.c at line 81\n");
     update_db (app_data->db_data);
     reload_db (app_data->db_data, err);
+    g_printerr ("[INFO]: after reload_db on db-misc.c at line 82\n");
     if (*err != NULL && !g_error_matches (*err, missing_file_gquark (), MISSING_FILE_CODE)) {
         g_printerr("%s\n", (*err)->message);
         return;
@@ -114,7 +116,9 @@ reload_db (DatabaseData  *db_data,
     g_slist_free_full (db_data->objects_hash, g_free);
     db_data->objects_hash = NULL;
 
+    g_printerr ("[INFO]: before load_db on db-misc.c at line 119\n");
     load_db (db_data, err);
+    g_printerr ("[INFO]: after load_db on db-misc.c at line 119\n");
 }
 
 
@@ -129,11 +133,13 @@ update_db (DatabaseData *data)
         // database is backed-up only if this is not the first run
         backup_db (data->db_path);
     }
+    g_printerr ("[INFO]: after backup_db on db-misc.c at line 134\n");
 
     g_slist_foreach (data->data_to_add, add_to_json, data->json_data);
 
     gchar *plain_data = json_dumps (data->json_data, JSON_COMPACT);
 
+    g_printerr ("[INFO]: before encrypt_db on db-misc.c at line 143\n");
     if (encrypt_db (data->db_path, plain_data, data->key) != NULL) {
         g_printerr ("Couldn't update the database.\n");
         if (!first_run) {
@@ -141,6 +147,7 @@ update_db (DatabaseData *data)
             restore_db (data->db_path);
         }
     }
+    g_printerr ("[INFO]: after encrypt_db on db-misc.c at line 143\n");
 
     gcry_free (plain_data);
 }
@@ -169,12 +176,12 @@ encrypt_db (const gchar *db_path,
     GFile *out_file = g_file_new_for_path (db_path);
     GFileOutputStream *out_stream = g_file_replace (out_file, NULL, FALSE, G_FILE_CREATE_REPLACE_DESTINATION, NULL, &err);
     if (err != NULL) {
-        g_printerr ("%s\n", err->message);
+        g_printerr ("LINE 179: %s\n", err->message);
         cleanup (out_file, NULL, header_data, err);
         return GENERIC_ERROR;
     }
     if (g_output_stream_write (G_OUTPUT_STREAM (out_stream), header_data, sizeof (HeaderData), NULL, &err) == -1) {
-        g_printerr ("%s\n", err->message);
+        g_printerr ("LINE 184: %s\n", err->message);
         cleanup (out_file, out_stream, header_data, err);
         return GENERIC_ERROR;
     }
@@ -199,6 +206,7 @@ encrypt_db (const gchar *db_path,
     gcry_cipher_gettag (hd, tag, TAG_SIZE); //append tag to outfile
 
     if (g_output_stream_write (G_OUTPUT_STREAM (out_stream), enc_buffer, input_data_len, NULL, &err) == -1) {
+        g_printerr ("LINE 209: %s\n", err->message);
         cleanup (out_file, out_stream, header_data, err);
         gcry_cipher_close (hd);
         g_free (enc_buffer);
@@ -207,6 +215,7 @@ encrypt_db (const gchar *db_path,
         return GENERIC_ERROR;
     }
     if (g_output_stream_write (G_OUTPUT_STREAM (out_stream), tag, TAG_SIZE, NULL, &err) == -1) {
+        g_printerr ("LINE 218: %s\n", err->message);
         cleanup (out_file, out_stream, header_data, err);
         gcry_cipher_close (hd);
         g_free (enc_buffer);
