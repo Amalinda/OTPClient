@@ -58,6 +58,7 @@ update_db_from_otps (GSList *otps, AppData *app_data)
     json_t *obj;
     guint list_len = g_slist_length (otps);
     for (guint i = 0; i < list_len; i++) {
+        g_print ("=> Processing element %u of %u\n", i, list_len);
         otp_t *otp = g_slist_nth_data (otps, i);
         obj = build_json_obj (otp->type, otp->account_name, otp->issuer, otp->secret, otp->digits, otp->algo, otp->period, otp->counter);
         guint hash = json_object_get_hash (obj);
@@ -74,14 +75,17 @@ update_db_from_otps (GSList *otps, AppData *app_data)
                 g_print ("[INFO] Duplicate element not added\n");
             }
         }
+        g_print ("=> done prcessing element %u\n", i);
     }
 
+    g_print ("=> updating and reloading db\n");
     GError *err = NULL;
     update_and_reload_db (app_data, TRUE, &err);
     if (err != NULL && !g_error_matches (err, missing_file_gquark (), MISSING_FILE_CODE)) {
         g_printerr ("[ERROR]: during execution of 'update_and_reload_db' from imports.c at line 80\n");
         return g_strdup (err->message);
     }
+    g_print ("-> done updating and reloading db\n");
 
     return NULL;
 }
@@ -138,8 +142,10 @@ parse_data_and_update_db (AppData       *app_data,
         return FALSE;
     }
 
+    g_print ("=> freeing stuff\n");
     gcry_free (pwd);
     free_otps_gslist (content, g_slist_length (content));
+    g_print (" => done freeing stuff\n");
 
     return TRUE;
 }
