@@ -135,9 +135,14 @@ update_db (DatabaseData *data)
     }
     g_printerr ("[INFO]: after backup_db on db-misc.c at line 134\n");
 
+    g_print ("[INFO]: before g_slist_foreach\n");
     g_slist_foreach (data->data_to_add, add_to_json, data->json_data);
+    g_print ("[INFO]: after g_slist_foreach\n");
 
     gchar *plain_data = json_dumps (data->json_data, JSON_COMPACT);
+    if (plain_data == NULL) {
+        g_printerr("couldn't dump json data\n");
+    }
 
     g_printerr ("[INFO]: before encrypt_db on db-misc.c at line 143\n");
     if (encrypt_db (data->db_path, plain_data, data->key) != NULL) {
@@ -157,7 +162,9 @@ static inline void
 add_to_json (gpointer list_elem,
              gpointer json_array)
 {
-    json_array_append (json_array, json_deep_copy (list_elem));
+    if(json_array_append (json_array, json_deep_copy (list_elem)) == -1) {
+        g_printerr("[ERROR] couldn't add value to array\n");
+    }
 }
 
 
