@@ -12,6 +12,7 @@
 #include "get-builder.h"
 #include "liststore-misc.h"
 #include "lock-app.h"
+#include "memory.h"
 
 
 #ifndef USE_FLATPAK_APP_FOLDER
@@ -108,7 +109,7 @@ activate (GtkApplication    *app,
     }
     gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
 
-    json_set_alloc_funcs (gcry_malloc_secure, gcry_free);
+    json_set_alloc_funcs (secure_malloc, secure_free);
 
 #ifdef USE_FLATPAK_APP_FOLDER
     app_data->db_data->db_path = g_build_filename (g_get_user_data_dir (), "otpclient-db.enc", NULL);
@@ -463,7 +464,7 @@ destroy_cb (GtkWidget   *window,
     gcry_free (app_data->db_data->key);
     g_free (app_data->db_data->db_path);
     g_slist_free_full (app_data->db_data->objects_hash, g_free);
-    json_decref (app_data->db_data->json_data);
+    secure_free (app_data->db_data->json_data);
     g_free (app_data->db_data);
     gtk_clipboard_clear (app_data->clipboard);
     g_application_withdraw_notification (G_APPLICATION(gtk_window_get_application (GTK_WINDOW(app_data->main_window))), NOTIFICATION_ID);

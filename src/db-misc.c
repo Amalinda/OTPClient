@@ -6,6 +6,7 @@
 #include "file-size.h"
 #include "gquarks.h"
 #include "common.h"
+#include "memory.h"
 
 typedef struct _header_data {
     guint8 iv[IV_SIZE];
@@ -156,7 +157,7 @@ update_db (DatabaseData *data)
     }
     g_printerr ("[INFO]: after encrypt_db on db-misc.c at line 143\n");
 
-    gcry_free (plain_data);
+    secure_free (plain_data);
 }
 
 

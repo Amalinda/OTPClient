@@ -6,6 +6,7 @@
 #include "imports.h"
 #include "common.h"
 #include "gquarks.h"
+#include "memory.h"
 
 #define ANDOTP_IV_SIZE  12
 #define ANDOTP_TAG_SIZE 16
@@ -186,7 +187,7 @@ export_andotp ( const gchar *export_path,
 
     cleanup_before_exiting:
     g_free (iv);
-    gcry_free (json_data);
+    secure_free (json_data);
     gcry_free (enc_buf);
     json_array_clear (array);
     g_object_unref (out_stream);
