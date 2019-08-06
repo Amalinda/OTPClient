@@ -57,13 +57,13 @@ activate (GtkApplication    *app,
 {
     gint64 memlock_limit = (gint64) user_data;
     gint32 max_file_size;
-    if (memlock_limit == -1 || memlock_limit > 256000) {
-        max_file_size = 256000; // memlock is either unlimited or bigger than needed
+    if (memlock_limit == -1 || memlock_limit > 4194304) {
+        max_file_size = 4194304; // memlock is either unlimited or bigger than needed
     } else if (memlock_limit == -5) {
         max_file_size = 64000; // couldn't get memlock limit, so falling back to a default, low value
         g_print ("[WARNING] your OS's memlock limit may be too low for you. Please have a look at https://github.com/paolostivanin/OTPClient#limitations\n");
     } else {
-        max_file_size = (gint32) memlock_limit; // memlock is less than 256 KB
+        max_file_size = (gint32) memlock_limit; // memlock is less than 4 MB
         g_print ("[WARNING] your OS's memlock limit may be too low for you. Please have a look at https://github.com/paolostivanin/OTPClient#limitations\n");
     }
 

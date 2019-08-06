@@ -139,14 +139,12 @@ update_db (DatabaseData *data)
     g_slist_foreach (data->data_to_add, add_to_json, data->json_data);
     g_print ("[INFO]: after g_slist_foreach\n");
 
-    json_set_alloc_funcs (g_malloc0, g_free);
     gchar *plain_data = json_dumps (data->json_data, JSON_COMPACT);
     if (plain_data == NULL) {
         g_printerr("couldn't dump json data\n");
     } else {
         g_print ("[INFO] json_dumps done\n");
     }
-    json_set_alloc_funcs (gcry_malloc_secure, gcry_free);
 
     g_printerr ("[INFO]: before encrypt_db on db-misc.c at line 143\n");
     if (encrypt_db (data->db_path, plain_data, data->key) != NULL) {
@@ -158,7 +156,7 @@ update_db (DatabaseData *data)
     }
     g_printerr ("[INFO]: after encrypt_db on db-misc.c at line 143\n");
 
-    g_free (plain_data);
+    gcry_free (plain_data);
 }
 
 
